@@ -1,20 +1,28 @@
-[Unit]
-Description=Agile Board Web Application
-After=network.target postgresql.service
+#!/bin/bash
+yum install -y git
 
-[Service]
-User=ec2-user
-Group=ec2-user
-WorkingDirectory=/home/ec2-user/agile-board-monolith
-Environment="PYTHONPATH=src"
-EnvironmentFile=/home/ec2-user/agile-board-monolith/.env
+dnf install -y git postgresql15-server postgresql15
+/usr/bin/postgresql-setup --initdb
 
-# Allows ec2-user to bind to port 80 without full root privileges
-AmbientCapabilities=CAP_NET_BIND_SERVICE
-ExecStart=/home/ec2-user/agile-board-monolith/venv/bin/gunicorn 'agile_board.app:create_app()' --bind 0.0.0.0:80 --workers 2
+PG_HBA="/var/lib/pgsql/data/pg_hba.conf"
+sed -i 's/127.0.0.1\/32            ident/127.0.0.1\/32            trust/' "$PG_HBA"
 
-Restart=always
-RestartSec=3
+systemctl enable --now postgresql
+su - postgres -c "psql -c 'CREATE USER app_user;'"
+su - postgres -c "psql -c 'CREATE DATABASE agile_board OWNER app_user;'"
 
-[Install]
-WantedBy=multi-user.target
+git clone https://github.com/AJamell/agile-board-monolith.git /agile-board-monolith
+cd /agile-board-monolith
+chmod +x scripts/redeploy.sh
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r deploy/requirements.txt
+
+cat << 'ENVEOF' > .env
+DB_URL=postgresql://app_user@127.0.0.1:5432/agile_board
+ENVEOF
+
+cp deploy/agile_board.service /etc/systemd/system
+systemctl daemon-reload
+systemctl enable agile_board.service
+systemctl start agile_board.service
