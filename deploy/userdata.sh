@@ -10,7 +10,7 @@ systemctl enable --now postgresql
 su - postgres -c "psql -c 'CREATE USER app_user;'"
 su - postgres -c "psql -c 'CREATE DATABASE agile_board OWNER app_user;'"
 
-git clone https://github.com/AJamell/agile-board-monolith.git /agile-board-monolith
+git clone https://github.com/cs390f26/agile-board-monolith.git /agile-board-monolith
 cd /agile-board-monolith
 python3.11 -m venv .venv
 .venv/bin/pip install -r deploy/requirements.txt
