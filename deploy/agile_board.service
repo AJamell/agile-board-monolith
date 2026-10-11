@@ -5,7 +5,7 @@ After=network.target postgresql.service
 [Service]
 WorkingDirectory=/agile-board-monolith
 EnvironmentFile=/agile-board-monolith/.env
-ExecStart=/agile-board-monolith/.venv/bin/gunicorn 'agile_board.app:create_app()' --bind 0.0.0.0:80 --workers 2
+ExecStart=/agile-board-monolith/.venv/bin/gunicorn 'agile_board.app:create_app()' --chdir /agile-board-monolith/src --bind 0.0.0.0:80 --workers 2
 Restart=always
 RestartSec=3
 
