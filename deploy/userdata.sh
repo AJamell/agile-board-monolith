@@ -8,8 +8,8 @@ PG_HBA="/var/lib/pgsql/data/pg_hba.conf"
 sed -i 's/127.0.0.1\/32            ident/127.0.0.1\/32            trust/' "$PG_HBA"
 
 systemctl enable --now postgresql
-su - postgres -c "psql -c 'CREATE USER app_user;'"
-su - postgres -c "psql -c 'CREATE DATABASE agile_board OWNER app_user;'"
+su - postgres -c "psql -c 'CREATE USER app_user;'" || true
+su - postgres -c "psql -c 'CREATE DATABASE agile_board OWNER app_user;'" || true
 
 git clone https://github.com/AJamell/agile-board-monolith.git /agile-board-monolith
 cd /agile-board-monolith
